@@ -296,6 +296,7 @@ if __name__ == '__main__':
         logging.info('learning rate:{}'.format(optimizer.lr))
 
         one_epoch_resnet(args,model,optimizer,tr_data,tr_labels,epoch,True)
+        model.save()
 
         # one_epoch(args, model, optimizer, tr_data, tr_labels, epoch, True)
 
