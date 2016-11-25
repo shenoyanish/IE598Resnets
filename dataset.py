@@ -104,7 +104,7 @@ if __name__ == '__main__':
     test_data = data
     test_label = labels
     
-    f = h5py.File('%s/test_data' % args.outdir'CIFAR10.hdf5','w')
+    f = h5py.File('CIFAR10.hdf5','w')
     f.create_dataset('X_train',data=train_data,compression="gzip")
     f.create_dataset('Y_train',data=train_label,compression="gzip")
     f.create_dataset('X_test',data=test_data,compression="gzip")
