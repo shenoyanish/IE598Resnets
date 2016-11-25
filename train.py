@@ -264,7 +264,7 @@ if __name__ == '__main__':
     parser.add_argument('--model', type=str, default='models/VGG.py')
     parser.add_argument('--gpu', type=int, default=0)
     parser.add_argument('--epoch', type=int, default=50)
-    parser.add_argument('--batchsize', type=int, default=256) #128
+    parser.add_argument('--batchsize', type=int, default=500) #128
     parser.add_argument('--snapshot', type=int, default=10)
     parser.add_argument('--datadir', type=str, default='data')
 

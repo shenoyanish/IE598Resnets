@@ -1,6 +1,11 @@
-# IE598Resnets
+## IE598-project
 
-## Training
+## Download the code and save the data into CIFAR10.hdf5
+```
+bash download.sh
+```
+
+## Training the resnet
 ```
 python train.py --model models/ResNet.py --gpu 0
 ```

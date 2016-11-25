@@ -84,11 +84,11 @@ class ResNet(chainer.Chain):
                 x = getattr(self, name)(x)
 
             # print x.data.shape
-        if self.train:
-            self.loss = F.softmax_cross_entropy(x, t)
-            self.accuracy = F.accuracy(x, t)
-            return self.loss, self.accuracy
-        else:
-            return x
+       # if self.train:
+	self.loss = F.softmax_cross_entropy(x, t)
+	self.accuracy = F.accuracy(x, t)
+	return self.loss, self.accuracy
+        #else:
+         #   return x
 
 model = ResNet()
