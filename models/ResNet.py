@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import chainer
+from chainer import serializers
 import chainer.functions as F
 import chainer.links as L
 import math
-
+import os
 
 class Module(chainer.Chain):
 
@@ -59,11 +60,18 @@ class ResNet(chainer.Chain):
                  ('res6', Block(32, 64, n, 2)),
                  ('_apool7', F.AveragePooling2D(8, 1, 0, False, True)),
                  ('fc8', L.Linear(64, 10))]
-        for link in links:
-            if not link[0].startswith('_'):
+        for i,link in enumerate(links):
+            if 'res' in link[0] and os.path.isfile(link[0]+'.hdf5'):
+                self.add_link(link[0],serializers.load_hdf5(link[0]+'.hdf5'))
+            elif not link[0].startswith('_'):
                 self.add_link(*link)
         self.forward = links
         self.train = True
+
+    def save(self):
+        for name, f in self.forward:
+            if 'res' in name:
+                serializers.save_hdf5(name+'.hdf5',getattr(self,name))
 
     def clear(self):
         self.loss = None
