@@ -120,7 +120,7 @@ def one_epoch_resnet(args,model,optimizer,data,label,epoch,train):
 
     
     GPU_on = True if args.gpu >= 0 else False
-    logging.info('data loading started')
+    # logging.info('data loading started')
 
     #transfered model to gpu in get_model_optimizer
     #optimizer setup model called in get_model_optimizer
@@ -136,9 +136,6 @@ def one_epoch_resnet(args,model,optimizer,data,label,epoch,train):
     sum_accuracy = 0
     sum_loss = 0
     num = 0
-
-
-
     for i in range(0,data.shape[0],args.batchsize):
         if (GPU_on):
             data_batch = cuda.to_gpu(data[i:i+args.batchsize,:])
@@ -152,28 +149,34 @@ def one_epoch_resnet(args,model,optimizer,data,label,epoch,train):
         t = Variable(xp.asarray(label_batch))
 
         model.zerograds()
-        loss,accuracy = model(x,t)
+        
         # total_accuracy += 100.0*np.float(accuracy.data)
         # batch_counter += 1
         # num +=data_batch.shape[0]
 
         if train:
-            loss.backward()
-            optimizer.update()
-            sum_loss += float(loss.data) * len(t.data)
-            sum_accuracy += float(accuracy.data) * len(t.data)
-            num += t.data.shape[0]
-            logging.info('{:05d}/{:05d}\tloss:{:.3f}\tacc:{:.3f}'.format(num, data.shape[0], sum_loss / num, sum_accuracy / num))
-        else:
-            sum_accuracy += float(accuracy.data) * len(t.data)
-            num += 1
-            logging.info('{:05d}/{:05d}\tacc:{:.3f}'.format(num, data.shape[0], sum_accuracy / num))
+            # loss= model(x,t)
+            # loss.backward()
+            # optimizer.update()
 
-    # if train:
-    #     print("Training Epoch:{0},Batch:{1},TotalAccuracy:{2}".format(epoch,example_counter,total_accuracy/batch_counter))
-    # else:
-    #     print("Test Epoch:{0},Batch:{1},TotalAccuracy:{2}\n".format(epoch,example_counter,total_accuracy/batch_counter))
-    #     logging.info('{:05d}/{:05d}\tloss:{:.3f}\tacc:{:.3f}'.format(example_counter, data.shape[0], sum_loss / num, sum_accuracy / num))
+            optimizer.update(model, x, t)
+
+            if epoch == 1 and num == 0:
+                with open('{}/graph.dot'.format(args.result_dir), 'w') as o:
+                    g = computational_graph.build_computational_graph(
+                        (model.loss, ), remove_split=True)
+                    o.write(g.dump())
+            sum_loss += float(model.loss.data) * len(t.data)
+            sum_accuracy += float(model.accuracy.data) * len(t.data)
+            num += t.data.shape[0]
+            logging.info('{:05d}/{:05d}\tloss:{:.3f}\tacc:{:.3f}'.format(
+                num, data.shape[0], sum_loss / num, sum_accuracy / num))
+        else:
+            pred = model(x, t).data
+            sum_accuracy +=  sum(pred.argmax(axis=1) == t.data)
+            num += t.data.shape[0]
+            logging.info('{:05d}/{:05d}\tacc:{:.3f}'.format(
+                num, data.shape[0], sum_accuracy/num))
 
     if train and (epoch == 1 or epoch % args.snapshot == 0):
         model_fn = '{}/epoch-{}.model'.format(args.result_dir, epoch)
@@ -182,15 +185,10 @@ def one_epoch_resnet(args,model,optimizer,data,label,epoch,train):
         serializers.save_hdf5(opt_fn, optimizer)
 
     if train:
-        print('epoch:{}\ttrain loss:{}\ttrain accuracy:{}'.format(
-            epoch, sum_loss / data.shape[0], sum_accuracy / data.shape[0]))
-        logging.info('epoch:{}\ttrain loss:{}\ttrain accuracy:{}'.format(
-            epoch, sum_loss / data.shape[0], sum_accuracy / data.shape[0]))
+        logging.info('epoch:{}\ttrain loss:{:.4f}\ttrain accuracy:{:.4f}'.format(
+            epoch, sum_loss / num, sum_accuracy / num))
     else:
-        print('epoch:{}\ttest loss:{}\ttest accuracy:{}'.format(
-            epoch, sum_loss / data.shape[0], sum_accuracy / data.shape[0]))
-        logging.info('epoch:{}\ttest loss:{}\ttest accuracy:{}'.format(
-            epoch, sum_loss / data.shape[0], sum_accuracy / data.shape[0]))
+        logging.info('epoch:{}\ttest accuracy:{:.4f}'.format(epoch, sum_accuracy/num))
 
 def one_epoch(args, model, optimizer, data, label, epoch, train):
     model.train = train
@@ -263,11 +261,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', type=str, default='models/VGG.py')
     parser.add_argument('--gpu', type=int, default=0)
-    parser.add_argument('--epoch', type=int, default=50)
+    parser.add_argument('--epoch', type=int, default=400)
     parser.add_argument('--batchsize', type=int, default=500) #128
     parser.add_argument('--snapshot', type=int, default=10)
     parser.add_argument('--datadir', type=str, default='data')
-
+    
     # optimization
     parser.add_argument('--opt', type=str, default='MomentumSGD',
                         choices=['MomentumSGD', 'Adam', 'AdaGrad'])

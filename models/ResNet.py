@@ -29,7 +29,6 @@ class Module(chainer.Chain):
                 x = F.concat((x, x * 0))
         return F.relu(h + x)
 
-
 class Block(chainer.Chain):
 
     def __init__(self, n_in, n_out, n, stride=1):
@@ -58,8 +57,8 @@ class ResNet(chainer.Chain):
                  ('res4', Block(16, 16, n)),
                  ('res5', Block(16, 32, n, 2)),
                  ('res6', Block(32, 64, n, 2)),
-                 ('_apool7', F.AveragePooling2D(6, 1, 0, False, True)),
-                 ('fc8', L.Linear(576, 10))]
+                 ('_apool7', F.AveragePooling2D(8, 1, 0, False, True)),
+                 ('fc8', L.Linear(64, 10))]
         for link in links:
             if not link[0].startswith('_'):
                 self.add_link(*link)
@@ -82,13 +81,12 @@ class ResNet(chainer.Chain):
                 x = f(x)
             else:
                 x = getattr(self, name)(x)
-
             # print x.data.shape
-       # if self.train:
-	self.loss = F.softmax_cross_entropy(x, t)
-	self.accuracy = F.accuracy(x, t)
-	return self.loss, self.accuracy
-        #else:
-         #   return x
+        if self.train:
+            self.loss = F.softmax_cross_entropy(x, t)
+            self.accuracy = F.accuracy(x, t)
+            return self.loss
+        else:
+            return x
 
 model = ResNet()
