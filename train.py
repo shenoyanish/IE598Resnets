@@ -115,10 +115,10 @@ def augmentation(args, aug_queue, data, label, train):
 
 def random_crop_flip(xbatch):
     padding  = 4
-    padded_images = np.zeros((xbatch.shape[0],xbatch.shape[1],xbatch.shape[2]+2*padding,xbatch.shape[3]+2*padding))
-    cropped_images = np.zeros((xbatch.shape[0],xbatch.shape[1],xbatch.shape[2],xbatch.shape[3]))
-    crop_x0 = np.random.randint(0,2*padding+1,size=(xbatch.shape[0],1),dtype=np.int)
-    crop_y0 = np.random.randint(0,2*padding+1,size=(xbatch.shape[0],1),dtype=np.int)
+    padded_images = np.zeros((xbatch.shape[0],xbatch.shape[1],xbatch.shape[2]+2*padding,xbatch.shape[3]+2*padding),dtype=np.float32)
+    cropped_images = np.zeros((xbatch.shape[0],xbatch.shape[1],xbatch.shape[2],xbatch.shape[3]),dtype=np.float32)
+    crop_x0 = np.random.randint(0,2*padding+1,size=(xbatch.shape[0],1),dtype=np.int32)
+    crop_y0 = np.random.randint(0,2*padding+1,size=(xbatch.shape[0],1),dtype=np.int32)
     flip_p = np.random.random(size=(xbatch.shape[0],1))
     padded_images[:,:,padding:padding+xbatch.shape[2],padding:padding+xbatch.shape[3]] = xbatch[:,:,:,:]
     for j in range(xbatch.shape[0]):
