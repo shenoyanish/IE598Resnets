@@ -261,18 +261,19 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', type=str, default='models/VGG.py')
     parser.add_argument('--gpu', type=int, default=0)
-    parser.add_argument('--epoch', type=int, default=400)
-    parser.add_argument('--batchsize', type=int, default=500) #128
+    parser.add_argument('--epoch', type=int, default=100)
+    parser.add_argument('--batchsize', type=int, default=128) #128
     parser.add_argument('--snapshot', type=int, default=10)
     parser.add_argument('--datadir', type=str, default='data')
+    parser.add_argument('--augment', action='store_true', default=False)
 
     # optimization
     parser.add_argument('--opt', type=str, default='MomentumSGD',
                         choices=['MomentumSGD', 'Adam', 'AdaGrad'])
     parser.add_argument('--weight_decay', type=float, default=0.0001)
     parser.add_argument('--alpha', type=float, default=0.001)
-    parser.add_argument('--lr', type=float, default=0.01)
-    parser.add_argument('--lr_decay_freq', type=int, default=5)
+    parser.add_argument('--lr', type=float, default=0.1)
+    parser.add_argument('--lr_decay_freq', type=int, default=80)
     parser.add_argument('--lr_decay_ratio', type=float, default=0.1)
     parser.add_argument('--validate_freq', type=int, default=1)
     parser.add_argument('--seed', type=int, default=1701)
@@ -287,8 +288,8 @@ if __name__ == '__main__':
 
     # create model and optimizer
     model, optimizer = get_model_optimizer(args)
-    # dataset = load_dataset(args.datadir)
-    dataset = load_hdf5()
+
+    dataset = load_hdf5(args.augment)
     tr_data, tr_labels, te_data, te_labels = dataset
 
     # learning loop
