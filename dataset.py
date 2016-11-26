@@ -119,17 +119,11 @@ if __name__ == '__main__':
 
     data = data.reshape((50000, 3, 32, 32))
     labels = np.asarray(labels, dtype=np.int32)
-
-    # shuffle the dataset
-    perm = np.random.permutation(data.shape[0])
-    data = data[perm,:]
-    labels = labels[perm]
     
     train_data = data
     train_label = labels
 
     # read the test dataset
-    
     test = unpickle('cifar-10-batches-py/test_batch')
     data = np.asarray(test['data'], dtype=np.float)
     
@@ -138,11 +132,6 @@ if __name__ == '__main__':
 
     data = data.reshape((10000, 3, 32, 32))
     labels = np.asarray(test['labels'], dtype=np.int32)
-
-    # shuffle the dataset
-    perm = np.random.permutation(data.shape[0])
-    data = data[perm,:]
-    labels = labels[perm]
 
     test_data = data
     test_label = labels
@@ -154,8 +143,8 @@ if __name__ == '__main__':
     f.create_dataset('Y_test',data=test_label,compression="gzip")
     f.close()
 
-    # data written as np arrays
-    data = (nexamples,3,32,32), labels = (nexamples)
+    ## data written as np arrays
+    ## data = (nexamples,3,32,32), labels = (nexamples)
 
     # augmentation
     X_train = train_data
