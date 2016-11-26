@@ -72,7 +72,8 @@ class ResNet(chainer.Chain):
                  ('fc8', L.Linear(64, 10,initialW=initW, initial_bias=initbias))]
         for i,link in enumerate(links):
             if 'res' in link[0] and os.path.isfile(link[0]+'.hdf5'):
-                self.add_link(link[0],serializers.load_hdf5(link[0]+'.hdf5'))
+                self.add_link(*link)
+                serializers.load_hdf5(link[0]+'.hdf5',getattr(self,link[0]))
             elif not link[0].startswith('_'):
                 self.add_link(*link)
         self.forward = links
