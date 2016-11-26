@@ -113,6 +113,22 @@ def augmentation(args, aug_queue, data, label, train):
     aug_queue.put(None)
     return
 
+def random_crop_flip(xbatch):
+    padding  = 4
+    padded_images = np.zeros((xbatch.shape[0],xbatch.shape[1],xbatch.shape[2]+2*padding,xbatch.shape[3]+2*padding))
+    cropped_images = np.zeros((xbatch.shape[0],xbatch.shape[1],xbatch.shape[2],xbatch.shape[3]))
+    crop_x0 = np.random.randint(0,2*padding+1,size=(xbatch.shape[0],1),dtype=np.int)
+    crop_y0 = np.random.randint(0,2*padding+1,size=(xbatch.shape[0],1),dtype=np.int)
+    flip_p = np.random.random(size=(xbatch.shape[0],1))
+    padded_images[:,:,padding:padding+xbatch.shape[2],padding:padding+xbatch.shape[3]] = xbatch[:,:,:,:]
+    for j in range(xbatch.shape[0]):
+        cropped_images[j,:,:,:] =  padded_images[j,:,int(crop_x0[j]):int(crop_x0[j])+xbatch.shape[2],int(crop_y0[j]):int(crop_y0[j])+xbatch.shape[3]]
+        if flip_p[j]>=0.5:
+            cropped_images[j,:,:,:] = cropped_images[j,:,:,::-1]
+    assert(cropped_images.shape == xbatch.shape)
+    
+    return cropped_images
+
 def one_epoch_resnet(args,model,optimizer,data,label,epoch,train):
     model.train = train
 
@@ -137,12 +153,18 @@ def one_epoch_resnet(args,model,optimizer,data,label,epoch,train):
     sum_loss = 0
     num = 0
     for i in range(0,data.shape[0],args.batchsize):
+        data_batch = data[i:i+args.batchsize,:]
+        label_batch =label[i:i+args.batchsize]
+
+        if train:
+            data_batch = random_crop_flip(data_batch)
+
         if (GPU_on):
             data_batch = cuda.to_gpu(data[i:i+args.batchsize,:])
             label_batch = cuda.to_gpu(label[i:i+args.batchsize])
-        else:
-            data_batch = data[i:i+args.batchsize,:]
-            label_batch =label[i:i+args.batchsize]
+        # else:
+        #     data_batch = data[i:i+args.batchsize,:]
+        #     label_batch =label[i:i+args.batchsize]
 
         # convert to chainer variable
         x = Variable(xp.asarray(data_batch))
@@ -261,7 +283,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', type=str, default='models/VGG.py')
     parser.add_argument('--gpu', type=int, default=0)
-    parser.add_argument('--epoch', type=int, default=100)
+    parser.add_argument('--epoch', type=int, default=170)
     parser.add_argument('--batchsize', type=int, default=128) #128
     parser.add_argument('--snapshot', type=int, default=10)
     parser.add_argument('--datadir', type=str, default='data')
