@@ -155,9 +155,10 @@ def one_epoch_resnet(args,model,optimizer,data,label,epoch,train):
         # num +=data_batch.shape[0]
 
         if train:
-            # loss= model(x,t)
-            # loss.backward()
-            # optimizer.update()
+
+            #loss= model(x,t)
+            #loss.backward()
+            #optimizer.update()
 
             optimizer.update(model, x, t)
 
@@ -173,10 +174,9 @@ def one_epoch_resnet(args,model,optimizer,data,label,epoch,train):
                 num, data.shape[0], sum_loss / num, sum_accuracy / num))
         else:
             pred = model(x, t).data
-            sum_accuracy +=  sum(pred.argmax(axis=1) == t.data)
+            sum_accuracy +=  float(sum(pred.argmax(axis=1) == t.data))
             num += t.data.shape[0]
-            logging.info('{:05d}/{:05d}\tacc:{:.3f}'.format(
-                num, data.shape[0], sum_accuracy/num))
+        del x,t
 
     if train and (epoch == 1 or epoch % args.snapshot == 0):
         model_fn = '{}/epoch-{}.model'.format(args.result_dir, epoch)
@@ -188,7 +188,7 @@ def one_epoch_resnet(args,model,optimizer,data,label,epoch,train):
         logging.info('epoch:{}\ttrain loss:{:.4f}\ttrain accuracy:{:.4f}'.format(
             epoch, sum_loss / num, sum_accuracy / num))
     else:
-        logging.info('epoch:{}\ttest accuracy:{:.4f}'.format(epoch, sum_accuracy/num))
+        logging.info('epoch:%d\ttest accuracy:%0.4f'%(epoch,sum_accuracy/num))
 
 def one_epoch(args, model, optimizer, data, label, epoch, train):
     model.train = train
@@ -261,18 +261,19 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', type=str, default='models/VGG.py')
     parser.add_argument('--gpu', type=int, default=0)
-    parser.add_argument('--epoch', type=int, default=400)
-    parser.add_argument('--batchsize', type=int, default=500) #128
+    parser.add_argument('--epoch', type=int, default=100)
+    parser.add_argument('--batchsize', type=int, default=128) #128
     parser.add_argument('--snapshot', type=int, default=10)
     parser.add_argument('--datadir', type=str, default='data')
-    
+    parser.add_argument('--augment', action='store_true', default=False)
+
     # optimization
     parser.add_argument('--opt', type=str, default='MomentumSGD',
                         choices=['MomentumSGD', 'Adam', 'AdaGrad'])
     parser.add_argument('--weight_decay', type=float, default=0.0001)
     parser.add_argument('--alpha', type=float, default=0.001)
-    parser.add_argument('--lr', type=float, default=0.01)
-    parser.add_argument('--lr_decay_freq', type=int, default=5)
+    parser.add_argument('--lr', type=float, default=0.1)
+    parser.add_argument('--lr_decay_freq', type=int, default=80)
     parser.add_argument('--lr_decay_ratio', type=float, default=0.1)
     parser.add_argument('--validate_freq', type=int, default=1)
     parser.add_argument('--seed', type=int, default=1701)
@@ -287,8 +288,8 @@ if __name__ == '__main__':
 
     # create model and optimizer
     model, optimizer = get_model_optimizer(args)
-    # dataset = load_dataset(args.datadir)
-    dataset = load_hdf5()
+
+    dataset = load_hdf5(args.augment)
     tr_data, tr_labels, te_data, te_labels = dataset
 
     # learning loop
@@ -296,7 +297,6 @@ if __name__ == '__main__':
         logging.info('learning rate:{}'.format(optimizer.lr))
 
         one_epoch_resnet(args,model,optimizer,tr_data,tr_labels,epoch,True)
-        # model.save()
 
         # one_epoch(args, model, optimizer, tr_data, tr_labels, epoch, True)
 
