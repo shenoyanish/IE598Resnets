@@ -13,10 +13,11 @@ import numpy as np
 class Module(chainer.Chain):
 
     def __init__(self, n_in, n_out, stride=1):
-        # w = math.sqrt(2)
+        
         self.dtype = np.float32
-        initW = initializers.HeNormal(1 / np.sqrt(2), self.dtype)
-        initbias = initializers.Zero(self.dtype)
+        w = 1/np.sqrt(2)
+        initW = initializers.HeNormal(scale=w)
+        initbias = initializers.Zero()
         super(Module, self).__init__(
             conv1=L.Convolution2D(n_in, n_out, 3, stride, 1, 1, initialW=initW, initial_bias=initbias),
             bn1=L.BatchNormalization(n_out,dtype=self.dtype),
@@ -56,10 +57,11 @@ class ResNet(chainer.Chain):
 
     def __init__(self, n=5):
         super(ResNet, self).__init__()
-        w = math.sqrt(2)
         self.dtype = np.float32
-        initW = initializers.HeNormal(1 / np.sqrt(2), self.dtype)
-        initbias = initializers.Zero(self.dtype)
+        w = 1/np.sqrt(2)
+        initW = initializers.HeNormal(scale=w)
+        initbias = initializers.Zero()
+        
         links = [('conv1', L.Convolution2D(3, 16, 3, 1, 1, initialW=initW, initial_bias=initbias)),
                  ('bn2', L.BatchNormalization(16,dtype=self.dtype)),
                  ('_relu3', F.ReLU()),
