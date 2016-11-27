@@ -87,3 +87,10 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# HDF5 files
+.hdf5
+
+# model and state files from chainer
+.model
+.state
