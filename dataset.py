@@ -115,7 +115,12 @@ if __name__ == '__main__':
         labels.extend(batch['labels'])
 
     #normalize data
-    data = data/255.0
+    #data = data/255.0
+
+    if args.whitening:
+        components, mean, data = preprocessing(data)
+        np.save('{}/components'.format(args.outdir), components)
+        np.save('{}/mean'.format(args.outdir), mean)
 
     data = data.reshape((50000, 3, 32, 32))
     labels = np.asarray(labels, dtype=np.int32)
@@ -128,7 +133,13 @@ if __name__ == '__main__':
     data = np.asarray(test['data'], dtype=np.float)
     
     #normalize data
-    data = data/255.0
+    #data = data/255.0
+
+
+    if args.whitening:
+        components, mean, data = preprocessing(data)
+        np.save('{}/components'.format(args.outdir), components)
+        np.save('{}/mean'.format(args.outdir), mean)
 
     data = data.reshape((10000, 3, 32, 32))
     labels = np.asarray(test['labels'], dtype=np.int32)
@@ -198,5 +209,3 @@ if __name__ == '__main__':
     g.create_dataset('X_test', data = X_test, compression = "gzip")
     g.create_dataset('Y_test', data = Y_test, compression = "gzip")
     g.close()
-
-
