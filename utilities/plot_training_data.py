@@ -2,21 +2,33 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def parse_init_line(firstline):
+def parse_init_line(firstline,augment):
 	params=dict()
 	params['alpha'] = float(firstline.split(' ')[3].split('(')[1].split(',')[0].split('=')[1])
-	params['batchsize']= int(firstline.split(' ')[4].split(',')[0].split('=')[1])
-	params['epoch']= int(firstline.split(' ')[6].split(',')[0].split('=')[1])
-	params['gpu']= int(firstline.split(' ')[7].split(',')[0].split('=')[1])
-	params['lr']= float(firstline.split(' ')[8].split(',')[0].split('=')[1])
-	params['lr_decay_freq']= float(firstline.split(' ')[9].split(',')[0].split('=')[1])
-	params['lr_decay_ratio']= float(firstline.split(' ')[10].split(',')[0].split('=')[1])
-	params['models']= firstline.split(' ')[11].split(',')[0].split('=')[1]
-	params['opt']= firstline.split(' ')[12].split(',')[0].split('=')[1]
-	params['weight_decay'] =float(firstline.split(' ')[16].split(')')[0].split('=')[1])
+	if not augment:	
+		params['batchsize']= int(firstline.split(' ')[4].split(',')[0].split('=')[1])
+		params['epoch']= int(firstline.split(' ')[6].split(',')[0].split('=')[1])
+		params['gpu']= int(firstline.split(' ')[7].split(',')[0].split('=')[1])
+		params['lr']= float(firstline.split(' ')[8].split(',')[0].split('=')[1])
+		params['lr_decay_freq']= float(firstline.split(' ')[9].split(',')[0].split('=')[1])
+		params['lr_decay_ratio']= float(firstline.split(' ')[10].split(',')[0].split('=')[1])
+		params['models']= firstline.split(' ')[11].split(',')[0].split('=')[1]
+		params['opt']= firstline.split(' ')[12].split(',')[0].split('=')[1]
+		params['weight_decay'] =float(firstline.split(' ')[16].split(')')[0].split('=')[1])
+	else:
+		params['batchsize']= int(firstline.split(' ')[5].split(',')[0].split('=')[1])
+		params['epoch']= int(firstline.split(' ')[7].split(',')[0].split('=')[1])
+		params['gpu']= int(firstline.split(' ')[8].split(',')[0].split('=')[1])
+		params['lr']= float(firstline.split(' ')[9].split(',')[0].split('=')[1])
+		params['lr_decay_freq']= float(firstline.split(' ')[10].split(',')[0].split('=')[1])
+		params['lr_decay_ratio']= float(firstline.split(' ')[11].split(',')[0].split('=')[1])
+		params['models']= firstline.split(' ')[12].split(',')[0].split('=')[1]
+		params['opt']= firstline.split(' ')[13].split(',')[0].split('=')[1]
+		params['weight_decay'] =float(firstline.split(' ')[17].split(')')[0].split('=')[1])
+
 	return params
 
-def parse_output_file(filename):
+def parse_output_file(filename, is_augment):
 	filecontent = open(filename,'r')
 	trainlength=50000
 	n_iterations = int(np.ceil(50000/200))
@@ -35,7 +47,7 @@ def parse_output_file(filename):
 	# train_accuracy_list = list()
 	for i,line in enumerate(filecontent):
 		if i==0:
-			params = parse_init_line(line)
+			params = parse_init_line(line,is_augment)
 			n_iterations = int(np.ceil(50000.0/params['batchsize']))
 		else:
 			if 'learning rate' in line:
@@ -48,7 +60,7 @@ def parse_output_file(filename):
 	
 	return params,np.asarray(learning_rates),np.asarray(train_loss),np.asarray(train_accuracy),np.asarray(test_accuracy)
 
-params,learning_rates,train_loss,train_accuracy,test_accuracy = parse_output_file('log.txt')
+params,learning_rates,train_loss,train_accuracy,test_accuracy = parse_output_file('../log.txt',True)
 
 
 plt.subplot(2,2,1)
