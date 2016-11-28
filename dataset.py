@@ -60,6 +60,12 @@ def preprocessing(data):
 
     return components, mean, whiten
 
+def meansubtract(data):
+    mean = np.mean(data, axis=0)
+    mdata = data - mean
+    return mdata
+
+
 def augment_data(image):
     temp_image = np.rollaxis(image, 0, 3)
 
@@ -117,10 +123,12 @@ if __name__ == '__main__':
     #normalize data
     #data = data/255.0
 
-    if args.whitening:
-        components, mean, data = preprocessing(data)
-        np.save('{}/components'.format(args.outdir), components)
-        np.save('{}/mean'.format(args.outdir), mean)
+#     if args.whitening:
+#         components, mean, data = preprocessing(data)
+#         np.save('{}/components'.format(args.outdir), components)
+#         np.save('{}/mean'.format(args.outdir), mean)
+        
+    data = meansubtract(data)
 
     data = data.reshape((50000, 3, 32, 32))
     labels = np.asarray(labels, dtype=np.int32)
@@ -136,11 +144,12 @@ if __name__ == '__main__':
     #data = data/255.0
 
 
-    if args.whitening:
-        components, mean, data = preprocessing(data)
-        np.save('{}/components'.format(args.outdir), components)
-        np.save('{}/mean'.format(args.outdir), mean)
-
+#     if args.whitening:
+#         components, mean, data = preprocessing(data)
+#         np.save('{}/components'.format(args.outdir), components)
+#         np.save('{}/mean'.format(args.outdir), mean)
+    
+    data = meansubtract(data)
     data = data.reshape((10000, 3, 32, 32))
     labels = np.asarray(test['labels'], dtype=np.int32)
 
