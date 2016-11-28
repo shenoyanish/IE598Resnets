@@ -160,8 +160,8 @@ def one_epoch_resnet(args,model,optimizer,data,label,epoch,train):
             data_batch = random_crop_flip(data_batch)
 
         if (GPU_on):
-            data_batch = cuda.to_gpu(data[i:i+args.batchsize,:])
-            label_batch = cuda.to_gpu(label[i:i+args.batchsize])
+            data_batch = cuda.to_gpu(data_batch)
+            label_batch = cuda.to_gpu(label_batch)
         # else:
         #     data_batch = data[i:i+args.batchsize,:]
         #     label_batch =label[i:i+args.batchsize]
